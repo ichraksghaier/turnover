@@ -102,25 +102,7 @@ def predict():
     })
 
 # Route pour afficher les graphiques
-@app.route('/graphs')
-def show_graphs():
-    global results_df
 
-    # Histogramme de la probabilité combinée
-    plt.figure(figsize=(8, 6))
-    plt.hist(results_df['combined_probability'], bins=20, color='skyblue', edgecolor='black')
-    plt.title('Distribution de la probabilité combinée de turnover')
-    plt.xlabel('Probabilité (%)')
-    plt.ylabel('Fréquence')
-    plt.tight_layout()
-
-    # Sauvegarder le graphique dans un objet BytesIO
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    
-    # Retourner le graphique comme image
-    return send_file(img, mimetype='image/png')
 
 # Exécuter l'application Flask
 if __name__ == '__main__':
