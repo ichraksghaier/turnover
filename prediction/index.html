@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction du Risque de Turnover</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .result {
+            background-color: #fff;
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .high-risk {
+            color: red;
+            font-weight: bold;
+        }
+        .low-risk {
+            color: green;
+            font-weight: bold;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 4px;
+            height: 10px;
+        }
+        .progress-bar-filled {
+            height: 100%;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Prédiction du Risque de Turnover</h1>
+    <form id="predictForm">
+        <label for="satisfaction">Satisfaction (0-1) :</label>
+        <input type="range" id="satisfaction" name="satisfaction" step="0.01" min="0" max="1" value="0.5" required>
+        <span id="satisfaction_value">0.50</span><br>
+
+        <label for="evaluation">Évaluation de performance (0-1) :</label>
+        <input type="range" id="evaluation" name="evaluation" step="0.01" min="0" max="1" value="0.5" required>
+        <span id="evaluation_value">0.50</span><br>
+
+        <label for="projectCount">Nombre de projets :</label>
+        <input type="number" id="projectCount" name="projectCount" placeholder="Nombre de projets" required><br>
+
+        <label for="averageMonthlyHours">Heures mensuelles moyennes :</label>
+        <input type="number" id="averageMonthlyHours" name="averageMonthlyHours" placeholder="Heures mensuelles moyennes" required><br>
+
+        <label for="yearsAtCompany">Années à l'entreprise :</label>
+        <input type="number" id="yearsAtCompany" name="yearsAtCompany" placeholder="Années passées à l'entreprise" required><br>
+
+        <label for="workAccident">Accident de travail :</label>
+        <select id="workAccident" name="workAccident" required>
+            <option value="true">Oui</option>
+            <option value="false">Non</option>
+        </select><br>
+
+        <label for="promotion">Promotion récente :</label>
+        <select id="promotion" name="promotion" required>
+            <option value="true">Oui</option>
+            <option value="false">Non</option>
+        </select><br>
+
+        <label for="department">Département :</label>
+        <select id="department" name="department" required>
+            <option value="0">IT</option>
+            <option value="1">RandD</option>
+            <option value="2">Accounting</option>
+            <option value="3">HR</option>
+            <option value="4">Management</option>
+            <option value="5">Marketing</option>
+            <option value="6">Product Management</option>
+            <option value="7">Sales</option>
+            <option value="8">Support</option>
+            <option value="9">Technical</option>
+        </select><br>
+
+        <label for="salary">Salaire :</label>
+        <select id="salary" name="salary" required>
+            <option value="0">High</option>
+            <option value="1">Low</option>
+            <option value="2">Medium</option>
+        </select><br>
+
+        <label for="gender">Genre :</label>
+        <select id="gender" name="gender" required>
+            <option value="1">Homme</option>
+            <option value="0">Femme</option>
+        </select><br>
+
+        <button type="submit">Prédire</button>
+    </form>
+
+    <div id="result" class="result">
+        <h2>Résultat de la Prédiction</h2>
+        <p id="combined_probability"></p>
+        <div id="progress-bar-container"></div>
+    </div>
+
+    <script>
+        // Mise à jour dynamique des valeurs Satisfaction et Évaluation
+        const satisfactionSlider = document.getElementById("satisfaction");
+        const satisfactionValue = document.getElementById("satisfaction_value");
+        satisfactionSlider.addEventListener("input", () => {
+            satisfactionValue.textContent = satisfactionSlider.value;
+        });
+    
+        const evaluationSlider = document.getElementById("evaluation");
+        const evaluationValue = document.getElementById("evaluation_value");
+        evaluationSlider.addEventListener("input", () => {
+            evaluationValue.textContent = evaluationSlider.value;
+        });
+    
+        document.getElementById("predictForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            
+            let formData = new FormData(event.target);
+            let data = {};
+            formData.forEach((value, key) => {
+                if (key === "workAccident" || key === "promotion") {
+                    data[key] = value === "true";
+                } else if (key === "satisfaction" || key === "evaluation") {
+                    data[key] = parseFloat(value);
+                } else if (key === "projectCount" || key === "averageMonthlyHours" || key === "yearsAtCompany") {
+                    data[key] = parseInt(value);
+                } else {
+                    data[key] = value;
+                }
+            });
+    
+            fetch("/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                let combinedProb = result.combined_probability.toFixed(2);
+    
+                const resultContainer = document.getElementById("result");
+                resultContainer.innerHTML = "";  // Clear previous results
+    
+                function addResult(label, probability, container) {
+                    const wrapper = document.createElement("div");
+                    wrapper.innerHTML = `<h3>${label} : ${probability}%</h3>`;
+                    const progressBar = document.createElement("div");
+                    progressBar.classList.add("progress-bar");
+                    const progressBarFilled = document.createElement("div");
+                    progressBarFilled.classList.add("progress-bar-filled");
+                    progressBarFilled.style.width = probability + "%";
+                    progressBarFilled.style.backgroundColor = probability > 50 ? "red" : "green";
+                    progressBar.appendChild(progressBarFilled);
+                    wrapper.appendChild(progressBar);
+                    container.appendChild(wrapper);
+                }
+    
+                // Display only combined probability
+                addResult("Probabilité combinée", combinedProb, resultContainer);
+    
+                // Display the risk message based on combined probability
+                const message = document.createElement("p");
+                message.innerHTML = combinedProb > 50 
+                    ? `<span class="high-risk">Cet employé a un risque élevé de quitter l'entreprise.</span>` 
+                    : `<span class="low-risk">Cet employé a peu de chances de quitter l'entreprise.</span>`;
+                resultContainer.appendChild(message);
+            })
+            .catch(error => console.error("Erreur de prédiction :", error));
+        });
+    </script>
+    
+</body>
+</html>
