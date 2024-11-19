@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisations de Turnover</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .chart {
+            background-color: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(57, 52, 52, 0.1);
+            padding: 10px;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        /* Nouveau style pour le titre des KPIs */
+        .chart h2 {
+            text-align: center;  /* Centrer le titre */
+            font-weight: normal;  /* Enlever le gras */
+            color: #333;  /* Couleur du texte */
+            font-size: 20px;  /* Taille du texte */
+        }
+    </style>
+</head>
+<body>
+    <h1>Visualisations de Turnover</h1>
+    <div class="container">
+        <!-- Graphique 1 : Prend deux colonnes -->
+        <div class="chart full-width">{{ fig1_html|safe }}</div>
+
+        <!-- Graphique 2 : Occupe toute la largeur -->
+        <div class="chart">{{ fig2_html|safe }}</div>
+
+        <!-- Graphiques 3, 4 et 5 : Organisation en grille -->
+        <div class="chart">{{ fig3_html|safe }}</div>
+        <div class="chart">{{ fig4_html|safe }}</div>
+        <div class="chart">{{ fig5_html|safe }}</div>
+        <div class="chart">{{ fig6_html|safe }}</div>
+        
+        <!-- Graphique des KPIs avec un cadre similaire aux autres graphiques -->
+        <div class="chart">
+            
+            {{ fig_kpi_html|safe }}
+        </div>
+    </div>
+</body>
+</html>
